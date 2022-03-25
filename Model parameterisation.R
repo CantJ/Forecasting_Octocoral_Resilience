@@ -2,7 +2,7 @@
 # This script goes through the calculation of vital rates (growth survival and recruitment), model parameterisation and
 # determination of adult viability (This is done simultaneously for all species).
 
-# Last modified: Jan 2022
+# Last modified: Mar 2022
 # Primary Author: James Cant
 
 # Clear work space memory

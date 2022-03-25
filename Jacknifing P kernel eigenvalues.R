@@ -1,7 +1,7 @@
 # This script follows on from the construction of the individual species IPM's and will Jacknife through each population to determine variance for the 
 # calculated P kernel eigenvalues.
 # 
-# Date last modified: Jan 2022
+# Date last modified: Mar 2022
 # Primary Author: James Cant
 
 # load required packages
@@ -313,16 +313,16 @@ interaction <- ggplot(interaction.data, aes(x = Year, y = Mean, col = Species, g
   labs(y = "", # add axis labels
        x = "") + 
   coord_cartesian(ylim = c(0, 1)) 
-interaction + geom_line(aes(linetype = Species), size = 0.6) + 
-  scale_linetype_manual(values = c("dashed", "dashed", "dashed")) +
-  geom_point(aes(col = Species), size = 3) + 
-  scale_colour_manual(values = c("#D55E00","#0072B2","#000000")) +
-  geom_errorbar(aes(ymax = Mean + SD, ymin = Mean - SD), width = 0.1) + 
-  theme_bw() + theme(panel.grid.major = element_blank(),
-                     panel.grid.minor = element_blank(),
-                     axis.text.x = element_text(size = 15, colour = "black"), axis.text.y = element_text(size = 15, colour = "black"),
-                     legend.justification=c(0,0), legend.position=c(0.1,0.1), #put legend in plot
-                     legend.background = element_blank(),
-                     legend.box.background = element_rect(colour = "black"))
+interaction.plot <- interaction + geom_line(aes(linetype = Species), size = 0.6) + 
+                                  scale_linetype_manual(values = c("dashed", "dashed", "dashed")) +
+                                  geom_point(aes(col = Species), size = 3) + 
+                                  scale_colour_manual(values = c("#D55E00","#0072B2","#000000")) +
+                                  geom_errorbar(aes(ymax = Mean + SD, ymin = Mean - SD), width = 0.1) + 
+                                  theme_bw() + theme(panel.grid.major = element_blank(),
+                                                     panel.grid.minor = element_blank(),
+                                                     axis.text.x = element_text(size = 15, colour = "black"), axis.text.y = element_text(size = 15, colour = "black"),
+                                                     legend.justification=c(0,0), legend.position=c(0.1,0.1), #put legend in plot
+                                                     legend.background = element_blank(),
+                                                     legend.box.background = element_rect(colour = "black"))
 
 ######################### End of code #############################
