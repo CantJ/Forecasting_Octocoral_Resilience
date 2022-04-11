@@ -665,7 +665,8 @@ Ant.rec <- ggpredict(Ant.rec.mod, terms = c("total.Adults[all]"))
 
 ## Eunicea
 # determine relationship
-Flex.rec.mod <- gamlss(E.Juveniles ~ total.Adults, data = Adjusted.data, family = "ZIP") # zero inflated poisson approach
+Flex.rec.mod <- gamlss(E.Juveniles ~ total.Adults, data = Adjusted.data, family = "ZIP",
+                       control = gamlss.control(n.cyc = 50)) # zero inflated poisson approach
 # estimate predicted pattern
 Flex.rec <- ggpredict(Flex.rec.mod, terms = c("total.Adults[all]"))
 
@@ -852,7 +853,7 @@ rownames(ant.params) <- rownames(flex.params) <- rownames(gorg.params) <- c(
   #recruit size
   "rcsz.par1","rcsz.par2",
   # recruitment function mean
-  "rec.int","rec.slope","rec.zero",
+  "mu.int","mu.slope","sigma",
   # recruitment function boundaries
   "rec.sd.int","rec.sd.slope")
 
@@ -903,15 +904,19 @@ s_z <- function(Size.t, m.par){
 
 # 4. Define the overall recruitment function -------------------------------------------------------
 R_DD <- function(Nt, m.par) {
-  a <- m.par["rec.int"]
-  b <- m.par["rec.slope"]
+  a <- m.par["mu.int"]
+  b <- m.par["mu.slope"]
   linear.mu <- a + (b * Nt) 
+  #mu <- exp(linear.mu)
+  
+  # Additional lines of code if choosing to allow recruit density variance to change with adult density.
   mu.mean <- exp(linear.mu) #this converts back from the log transformed regression parameters.
   mu.sd <- sqrt(pi/2) * exp((m.par["rec.sd.int"] + m.par["rec.sd.slope"] * Nt)) # determine variance in recruitment mean
   # randomly generated value from modeled distribution
   mu <- rnorm(1, mu.mean, mu.sd)
+  
   # The function now needs to determine if recruitment is zero or not.
-  R <- rZIP(n = 1, mu = mu, sigma = m.par["rec.zero"])
+  R <- rZIP(n = 1, mu = mu, sigma = m.par["sigma"])
   # little fix to keep recruitment under biological control
   if (R < 0) {R = 0}
   return(R)
@@ -987,10 +992,7 @@ hist(initial.pop[[2]], breaks = 117)
 hist(initial.pop[[3]], breaks = 117)
 # store the selected bin numbers (minimum plus a little to account for the extended size range for each integration)
 # Keep bin numbers consistent across species models
-m <- 160
-
-# determine the initial population sizes
-Nt.initial <- c(length(initial.pop[[1]]), length(initial.pop[[2]]), length(initial.pop[[3]]))
+m <- 200
 
 ##############################
 #Step 7: Build the IPMs - moment of truth!
@@ -1108,6 +1110,6 @@ Re(eigen(gorg.2014$P)$values[1])
 Re(eigen(gorg.2015$P)$values[1])
 Re(eigen(gorg.2016$P)$values[1])
 Re(eigen(gorg.2017$P)$values[1])
-Re(eigen(gorg.2018$P)$values[1]) 
+Re(eigen(gorg.2018$P)$values[1]) # Gorgonia appears to decline prior to the hurricane impact.
 
 ########################## End of code #############################

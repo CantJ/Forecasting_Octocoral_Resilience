@@ -9,11 +9,14 @@ library(ggplot2)
 library(Rmisc)
 library(reshape2)
 
+# set the random seed
+set.seed(46789)
+
 ###############################################
 # STEP 1: Organise required data and storage locations.
 ###############################################
 
-# re-store species dataframe so that they are not affected during Jacknifing.
+# re-store species dataframe so that they are not affected during Jackknifing.
 G.data <- Gorg_sp 
 A.data <- A_american
 E.data <- E_flexuosa
