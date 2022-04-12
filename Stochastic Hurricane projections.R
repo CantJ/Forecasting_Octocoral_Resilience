@@ -72,6 +72,7 @@ total.Nt[[1]][1] <- total.Nt[[2]][1] <- total.Nt[[3]][1] <- sum(ant.Nt[[1]][1], 
 # Assign hurricane frequency
 # Scenario 1: No Hurricanes
 hurricane.prob <- rep(0,length.out = tmax)
+
 # Scenario 2:
 # Hurricanes Maria and Irma passed the US Virgin Islands as Category 2 Hurricanes with wind speeds of 106Mph. Wind speeds of this magnitude have estimated return times of 1.54 years (0.65 annual probability)
 # However Knutson (2019) show that climate change in the North Atlantic are expected to reduce Hurricane frequencies by 20% (0.65*0.2 = 0.13). So by the year 2055 under a 2 degree climate scenario hurricane frequencies will be 0.52.
@@ -81,9 +82,14 @@ mid.century <- seq(0.65, 0.52,length.out = length(2018:2055)) #this reflects a 2
 ann.change <- (max(mid.century)-min(mid.century))/length(mid.century)
 # now ensure the probability of hurricanes changes annually at the same rate until the end of the century.
 hurricane.prob2 <- c(mid.century, seq(min(mid.century)-ann.change, min(mid.century)-(ann.change*(tmax-length(mid.century))), length.out = tmax-length(mid.century))) # hurricane declines will continue at the same rate until the end of the century
+# A little fix to prevent impossible probabilities
+hurricane.prob2[which(hurricane.prob2 >= 1)] <- 0.99
+
 # Scenario 3: Increasing Hurricane occurrence
 # Artificially define hurricane probability to increase by same rate as it is expected to decrease.
 hurricane.prob3 <- seq(from = 0.65, by = ann.change, length.out = tmax)
+# Again prevent improbable hurricane scenarios
+hurricane.prob3[which(hurricane.prob3 >= 1)] <- 0.99
 
 # create overall storage dataframe
 ant.store <- flex.store <- gorg.store <- list(matrix(NA, sim, tmax), matrix(NA, sim, tmax), matrix(NA, sim, tmax))
@@ -278,7 +284,7 @@ confplot(x = dates, y1 = apply(gorg.store[[1]], 2, CI)[3,], # lower CI values
          col = blacktrans, # polygon colour
          add = TRUE)
 # add the sample mean
-points(x = dates, apply(gorg.store[[1]], 2, CI)[2,], typ = "l", lty = "dashed", col = "#000000", add = TRUE, lwd = 1)
+points(x = dates, apply(gorg.store[[1]], 2, CI)[2,], typ = "l", lty = "dashed", col = "#000000", lwd = 1)
 # add legend!!!!
 legend(x = 2030, y = ymax, 
        legend = c("Eunicea flexuosa",#"Eunicea flexuosa",
@@ -294,10 +300,10 @@ legend(x = 2030, y = ymax,
                "dashed", #"dotted",
                "dashed"), #"dotted"),
        lwd = 3,
-       cex = 1,
+       cex = 1.5,
        bty = "n")
 
-##### Scenario 2: Decreasing hurricane liklihood
+##### Scenario 2: Decreasing hurricane likelihood
 # Eunicea
 plot(x = dates, apply(flex.store[[2]], 2, CI)[2,], typ = "n", ylim = c(0, ymax), yaxs = "i", xaxs = "i",
      xlab = "",
@@ -325,7 +331,7 @@ confplot(x = dates, y1 = apply(gorg.store[[2]], 2, CI)[3,], # lower CI values
          col = blacktrans, # polygon colour
          add = TRUE)
 # add the sample mean
-points(x = dates, apply(gorg.store[[2]], 2, CI)[2,], typ = "l", lty = "dashed", col = "#000000", add = TRUE, lwd = 1)
+points(x = dates, apply(gorg.store[[2]], 2, CI)[2,], typ = "l", lty = "dashed", col = "#000000", lwd = 1)
 # for publication legend will be copied across using illustrator 
 
 ##### Scenario 1: No Hurricane
@@ -355,7 +361,7 @@ confplot(x = dates, y1 = apply(gorg.store[[3]], 2, CI)[3,], # lower CI values
          col = blacktrans, # polygon colour
          add = TRUE)
 # add the sample mean
-points(x = dates, apply(gorg.store[[3]], 2, CI)[2,], typ = "l", lty = "dashed", col = "#000000", add = TRUE, lwd = 1)
+points(x = dates, apply(gorg.store[[3]], 2, CI)[2,], typ = "l", lty = "dashed", col = "#000000", lwd = 1)
 # Again legend will be manually copied across for publication
 
 # Calculate lambda s & its variance --------------------------------------------------------------------
