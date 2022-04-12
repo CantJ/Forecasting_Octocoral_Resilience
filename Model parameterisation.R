@@ -907,14 +907,10 @@ R_DD <- function(Nt, m.par) {
   a <- m.par["mu.int"]
   b <- m.par["mu.slope"]
   linear.mu <- a + (b * Nt) 
-  #mu <- exp(linear.mu)
-  
-  # Additional lines of code if choosing to allow recruit density variance to change with adult density.
   mu.mean <- exp(linear.mu) #this converts back from the log transformed regression parameters.
   mu.sd <- sqrt(pi/2) * exp((m.par["rec.sd.int"] + m.par["rec.sd.slope"] * Nt)) # determine variance in recruitment mean
   # randomly generated value from modeled distribution
   mu <- rnorm(1, mu.mean, mu.sd)
-  
   # The function now needs to determine if recruitment is zero or not.
   R <- rZIP(n = 1, mu = mu, sigma = m.par["sigma"])
   # little fix to keep recruitment under biological control
