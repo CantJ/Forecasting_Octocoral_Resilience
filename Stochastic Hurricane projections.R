@@ -40,7 +40,7 @@ for(i in 1:3) {
 # all of the storage vectors are ordered as 1 = Antillogorgia, 2 = Eunicea, 3 = Gorgonia.
 
 # define simulation details
-dates <- 2018:2100 # Projection dates
+dates <- 2018:2150 # Projection dates
 tmax = length(dates) # iteration length
 sim <- 1000 # number of simulations
 
