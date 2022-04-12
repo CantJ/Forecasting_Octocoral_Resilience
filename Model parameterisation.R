@@ -522,7 +522,7 @@ hist(gorg.recruits$Height, breaks = 10,
      cex.axis = 1.5, 
      xlim = c(0,2.5),
      ylim = c(0,200),
-     xaxs = "i", yaxs = "i") #could be a normal distribution - but it is continous and none negative.
+     xaxs = "i", yaxs = "i") #could be a normal distribution - but it is continuous and none negative.
 # the fitdistrplus package contains functions for determining these types of distributions 
 # the package allows for the plotting of a Cullen and Frey graph to determine the distribution of the data.
 descdist(gorg.recruits$Height, boot = 1000) #according to this the data is very centred and close to a normal and uniform distribution

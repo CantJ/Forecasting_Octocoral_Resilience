@@ -250,6 +250,9 @@ ymax <- max(round((max(apply(flex.store[[1]], 2, CI)[1,])+50), digits = -2), # S
             round((max(apply(flex.store[[2]], 2, CI)[1,])+50), digits = -2),  # Scenario 2
             round((max(apply(flex.store[[3]], 2, CI)[1,])+50), digits = -2)) # Scenario 3
 
+# Manually defining ymax can help to expand some of the visuals for the manuscript
+ymax <- 300
+
 # plot each scenario
 ##### Scenario 1: No Hurricane
 # Eunicea
@@ -285,6 +288,11 @@ confplot(x = dates, y1 = apply(gorg.store[[1]], 2, CI)[3,], # lower CI values
          add = TRUE)
 # add the sample mean
 points(x = dates, apply(gorg.store[[1]], 2, CI)[2,], typ = "l", lty = "dashed", col = "#000000", lwd = 1)
+# Add references lines for the initial population sizes used for each species
+segments(x0 = dates[1], y0 = h.store[2] * sum(initial.pop.integral[[2]]), x1 = dates[30], lty = "solid", col = "#0072B2", lwd = 2) # Flexuosa
+segments(x0 = dates[1], y0 = h.store[1] * sum(initial.pop.integral[[1]]), x1 = dates[30], lty = "solid", col = "#D55E00", lwd = 2) # Antillogorgia
+segments(x0 = dates[1], y0 = h.store[3] * sum(initial.pop.integral[[3]]), x1 = dates[30], lty = "solid", col = "#000000", lwd = 2) # Gorgonia
+
 # add legend!!!!
 legend(x = 2030, y = ymax, 
        legend = c("Eunicea flexuosa",#"Eunicea flexuosa",
@@ -334,7 +342,7 @@ confplot(x = dates, y1 = apply(gorg.store[[2]], 2, CI)[3,], # lower CI values
 points(x = dates, apply(gorg.store[[2]], 2, CI)[2,], typ = "l", lty = "dashed", col = "#000000", lwd = 1)
 # for publication legend will be copied across using illustrator 
 
-##### Scenario 1: No Hurricane
+##### Scenario 3: Increasing hurricane likelihood
 # Eunicea
 plot(x = dates, apply(flex.store[[3]], 2, CI)[2,], typ = "n", ylim = c(0, ymax), yaxs = "i", xaxs = "i",
      xlab = "",

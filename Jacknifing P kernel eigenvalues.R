@@ -309,7 +309,13 @@ interaction.data <- data.frame(Year = c(2013,2014,2015,2016,2017,2018,
                                         mean(lambdas.sc[,12], na.rm = T), mean(lambdas.sc[,13], na.rm = T), mean(lambdas.sc[,14], na.rm = T), mean(lambdas.sc[,15], na.rm = T), mean(lambdas.sc[,16], na.rm = T), mean(lambdas.sc[,17], na.rm = T)),
                                SD = c(sd(lambdas.sc[,1], na.rm = T), sd(lambdas.sc[,2], na.rm = T), sd(lambdas.sc[,3], na.rm = T), sd(lambdas.sc[,4], na.rm = T), sd(lambdas.sc[,5], na.rm = T), sd(lambdas.sc[,6], na.rm = T),
                                       sd(lambdas.sc[,7], na.rm = T), sd(lambdas.sc[,8], na.rm = T), sd(lambdas.sc[,9], na.rm = T), sd(lambdas.sc[,10], na.rm = T), sd(lambdas.sc[,11], na.rm = T),
-                                      sd(lambdas.sc[,12], na.rm = T), sd(lambdas.sc[,13], na.rm = T), sd(lambdas.sc[,14], na.rm = T), sd(lambdas.sc[,15], na.rm = T), sd(lambdas.sc[,16], na.rm = T), sd(lambdas.sc[,17], na.rm = T)))
+                                      sd(lambdas.sc[,12], na.rm = T), sd(lambdas.sc[,13], na.rm = T), sd(lambdas.sc[,14], na.rm = T), sd(lambdas.sc[,15], na.rm = T), sd(lambdas.sc[,16], na.rm = T), sd(lambdas.sc[,17], na.rm = T)),
+                               CIlow = c(CI(na.omit(lambdas.sc[,1]))[3], CI(na.omit(lambdas.sc[,2]))[3], CI(na.omit(lambdas.sc[,3]))[3], CI(na.omit(lambdas.sc[,4]))[3], CI(na.omit(lambdas.sc[,5]))[3], CI(na.omit(lambdas.sc[,6]))[3], 
+                                         CI(na.omit(lambdas.sc[,7]))[3], CI(na.omit(lambdas.sc[,8]))[3], CI(na.omit(lambdas.sc[,9]))[3], CI(na.omit(lambdas.sc[,10]))[3], CI(na.omit(lambdas.sc[,11]))[3], CI(na.omit(lambdas.sc[,12]))[3], 
+                                         CI(na.omit(lambdas.sc[,13]))[3], CI(na.omit(lambdas.sc[,14]))[3], CI(na.omit(lambdas.sc[,15]))[3], CI(na.omit(lambdas.sc[,16]))[3], CI(na.omit(lambdas.sc[,17]))[3]),
+                               CIhigh = c(CI(na.omit(lambdas.sc[,1]))[1], CI(na.omit(lambdas.sc[,2]))[1], CI(na.omit(lambdas.sc[,3]))[1], CI(na.omit(lambdas.sc[,4]))[1], CI(na.omit(lambdas.sc[,5]))[1], CI(na.omit(lambdas.sc[,6]))[1], 
+                                          CI(na.omit(lambdas.sc[,7]))[1], CI(na.omit(lambdas.sc[,8]))[1], CI(na.omit(lambdas.sc[,9]))[1], CI(na.omit(lambdas.sc[,10]))[1], CI(na.omit(lambdas.sc[,11]))[1], CI(na.omit(lambdas.sc[,12]))[1], 
+                                          CI(na.omit(lambdas.sc[,13]))[1], CI(na.omit(lambdas.sc[,14]))[1], CI(na.omit(lambdas.sc[,15]))[1], CI(na.omit(lambdas.sc[,16]))[1], CI(na.omit(lambdas.sc[,17]))[1]))
 
 # create the interaction plot
 interaction <- ggplot(interaction.data, aes(x = Year, y = Mean, col = Species, group = Species), xlab(NULL), ylab(NULL)) + 
@@ -320,7 +326,7 @@ interaction.plot <- interaction + geom_line(aes(linetype = Species), size = 0.6)
                                   scale_linetype_manual(values = c("dashed", "dashed", "dashed")) +
                                   geom_point(aes(col = Species), size = 3) + 
                                   scale_colour_manual(values = c("#D55E00","#0072B2","#000000")) +
-                                  geom_errorbar(aes(ymax = Mean + SD, ymin = Mean - SD), width = 0.1) + 
+                                  geom_errorbar(aes(ymax = CIhigh, ymin = CIlow), width = 0.2) + 
                                   theme_bw() + theme(panel.grid.major = element_blank(),
                                                      panel.grid.minor = element_blank(),
                                                      axis.text.x = element_text(size = 15, colour = "black"), axis.text.y = element_text(size = 15, colour = "black"),
