@@ -1,8 +1,9 @@
 # This script follows on from the construction of the individual species IPM's and will Jacknife through each population to determine variance for the 
 # calculated P kernel eigenvalues.
-# 
-# Date last modified: Mar 2022
+
 # Primary Author: James Cant
+# Contact: james.cant91@gmail.com
+#-----------------------------------
 
 # load required packages
 library(ggplot2)
@@ -20,9 +21,12 @@ set.seed(46789)
 G.data <- Gorg_sp 
 A.data <- A_american
 E.data <- E_flexuosa
-DD1.ant <- DD1[which(DD1$Genus == "Antillogorgia"),]
-DD1.flex <- DD1[which(DD1$Genus == "Eunicea"),]
-DD1.gorg <- DD1[which(DD1$Genus == "Gorgonia"),]
+Recruits.ant <- Recruits[which(Recruits$Genus == "Antillogorgia"),]
+Recruits.flex <- Recruits[which(Recruits$Genus == "Eunicea"),]
+Recruits.gorg <- Recruits[which(Recruits$Genus == "Gorgonia"),]
+Adults.ant <- Adults[which(Adults$Genus == "Antillogorgia"),]
+Adults.flex <- Adults[which(Adults$Genus == "Eunicea"),]
+Adults.gorg <- Adults[which(Adults$Genus == "Gorgonia"),]
 
 # lambda storage
 lambdas.sc <- matrix(NA, 1000, 17) #there is a list of lambdas for each species in each year
@@ -45,9 +49,12 @@ for (x in 1:1000) {
   try(A.data.1 <- A.data[sample(nrow(A.data), 0.95*dim(A.data)[1], replace = F),])
   try(E.data.1 <- E.data[sample(nrow(E.data), 0.95*dim(E.data)[1], replace = F),])
   # and again for the full community data set (this is only used here to determine the max and min size boundaries of the populations)
-  try(DD1.ant.1 <- DD1.ant[sample(nrow(DD1.ant), 0.95*dim(DD1.ant)[1], replace = F),]) 
-  try(DD1.flex.1 <- DD1.flex[sample(nrow(DD1.flex), 0.95*dim(DD1.flex)[1], replace = F),])
-  try(DD1.gorg.1 <- DD1.gorg[sample(nrow(DD1.gorg), 0.95*dim(DD1.gorg)[1], replace = F),])
+  try(Recruit.ant.1 <- Recruits.ant[sample(nrow(Recruits.ant), 0.95*dim(Recruits.ant)[1], replace = F),]) 
+  try(Recruit.flex.1 <- Recruits.flex[sample(nrow(Recruits.flex), 0.95*dim(Recruits.flex)[1], replace = F),])
+  try(Recruit.gorg.1 <- Recruits.gorg[sample(nrow(Recruits.gorg), 0.95*dim(Recruits.gorg)[1], replace = F),])
+  try(Adult.ant.1 <- Adults.ant[sample(nrow(Adults.ant), 0.95*dim(Adults.ant)[1], replace = F),]) 
+  try(Adult.flex.1 <- Adults.flex[sample(nrow(Adults.flex), 0.95*dim(Adults.flex)[1], replace = F),])
+  try(Adult.gorg.1 <- Adults.gorg[sample(nrow(Adults.gorg), 0.95*dim(Adults.gorg)[1], replace = F),])
   
   # Re-calculate each of the vital rates of growth and survival forcing the data to follow the same regression formats as the orginal models
   #### Growth ####
@@ -76,9 +83,9 @@ for (x in 1:1000) {
        
   #### Store model coefficients ####
       # blank matrices to store the yearly parameters for each species separately
-      try(jgorg.params <- matrix(NA, 7, 6))
-      try(jflex.params <- matrix(NA, 7, 5))
-      try(jant.params <- matrix(NA, 7, 6))
+      try(jgorg.params <- matrix(NA, 8, 6))
+      try(jflex.params <- matrix(NA, 8, 5))
+      try(jant.params <- matrix(NA, 8, 6))
       
       # Fill each matrix.
       # survival
@@ -169,7 +176,9 @@ for (x in 1:1000) {
         #growth
         "grow.int", "grow.slope",
         #growth variability
-        "grow.sd.int","grow.sd.slope"))
+        "grow.sd.int","grow.sd.slope",
+        # Size ceiling
+        "U1"))
       
       try(colnames(jant.params) <- colnames(jgorg.params) <- c("2013","2014","2015","2016","2017","2018"))
       try(colnames(jflex.params) <- c("2014","2015","2016","2017","2018"))
@@ -178,38 +187,43 @@ for (x in 1:1000) {
    #### Define final model details
       
       # define model parameters
-      try(jL.list <- c(0.9*min(c(A.data.1$Size.t, A.data.1$Size.t1, DD1.ant.1$Height), na.rm = T), 
-                  0.9*min(c(E.data.1$Size.t, E.data.1$Size.t1, DD1.flex.1$Height), na.rm = T),
-                  0.9*min(c(G.data.1$Size.t, G.data.1$Size.t1, DD1.gorg.1$Height), na.rm = T)))
-      try(jU.list <- c(1.1*max(c(A.data.1$Size.t, A.data.1$Size.t1, DD1.ant.1$Height), na.rm = T), 
-                  1.1*max(c(E.data.1$Size.t, E.data.1$Size.t1, DD1.flex.1$Height), na.rm = T),
-                  1.1*max(c(G.data.1$Size.t, G.data.1$Size.t1, DD1.gorg.1$Height), na.rm = T)))
+      try(jL.list <- c(0.9*min(c(A.data.1$Size.t, A.data.1$Size.t1, Recruit.ant.1$Height..cm.), na.rm = T), 
+                  0.9*min(c(E.data.1$Size.t, E.data.1$Size.t1, Recruit.flex.1$Height..cm.), na.rm = T),
+                  0.9*min(c(G.data.1$Size.t, G.data.1$Size.t1, Recruit.gorg.1$Height..cm.), na.rm = T)))
+      try(jU.list <- c(1.1*max(c(A.data.1$Size.t, A.data.1$Size.t1, Adult.ant.1$Height..cm.), na.rm = T), 
+                  1.1*max(c(E.data.1$Size.t, E.data.1$Size.t1, Adult.flex.1$Height..cm.), na.rm = T),
+                  1.1*max(c(G.data.1$Size.t, G.data.1$Size.t1, Adult.gorg.1$Height..cm.), na.rm = T)))
+  
+      # define ceiling parameters
+      try(jant.params[8,] <- max(c(A.data.1$Size.t, A.data.1$Size.t1, Adult.ant.1$Height..cm.), na.rm = T))
+      try(jflex.params[8,] <- max(c(E.data.1$Size.t, E.data.1$Size.t1, Adult.flex.1$Height..cm.), na.rm = T))
+      try(jgorg.params[8,] <- max(c(G.data.1$Size.t, G.data.1$Size.t1, Adult.gorg.1$Height..cm.), na.rm = T))
       
    #### The value of m used will stay the same, as will the initial Nt values (as Im only interested here in the P values)
       
    #### Build the IPMs ####
       ## Antillogorgia
-      try(jAnt.2013 <- mk_P(m = m, m.par = jant.params[,1], L = jL.list[1], U = jU.list[1]))
-      try(jAnt.2014 <- mk_P(m = m, m.par = jant.params[,2], L = jL.list[1], U = jU.list[1]))
-      try(jAnt.2015 <- mk_P(m = m, m.par = jant.params[,3], L = jL.list[1], U = jU.list[1]))
-      try(jAnt.2016 <- mk_P(m = m, m.par = jant.params[,4], L = jL.list[1], U = jU.list[1]))
-      try(jAnt.2017 <- mk_P(m = m, m.par = jant.params[,5], L = jL.list[1], U = jU.list[1]))
-      try(jAnt.2018 <- mk_P(m = m, m.par = jant.params[,6], L = jL.list[1], U = jU.list[1]))
+      try(jAnt.2013 <- mk_P_ceiling(m = m, m.par = jant.params[,1], L = jL.list[1], U = jU.list[1], U1 = jant.params[8,1]))
+      try(jAnt.2014 <- mk_P_ceiling(m = m, m.par = jant.params[,2], L = jL.list[1], U = jU.list[1], U1 = jant.params[8,2]))
+      try(jAnt.2015 <- mk_P_ceiling(m = m, m.par = jant.params[,3], L = jL.list[1], U = jU.list[1], U1 = jant.params[8,3]))
+      try(jAnt.2016 <- mk_P_ceiling(m = m, m.par = jant.params[,4], L = jL.list[1], U = jU.list[1], U1 = jant.params[8,4]))
+      try(jAnt.2017 <- mk_P_ceiling(m = m, m.par = jant.params[,5], L = jL.list[1], U = jU.list[1], U1 = jant.params[8,5]))
+      try(jAnt.2018 <- mk_P_ceiling(m = m, m.par = jant.params[,6], L = jL.list[1], U = jU.list[1], U1 = jant.params[8,6]))
       
       ## Eunicea
-      try(jflex.2014 <- mk_P(m = m, m.par = jflex.params[,1], L = jL.list[2], U = jU.list[2]))
-      try(jflex.2015 <- mk_P(m = m, m.par = jflex.params[,2], L = jL.list[2], U = jU.list[2]))
-      try(jflex.2016 <- mk_P(m = m, m.par = jflex.params[,3], L = jL.list[2], U = jU.list[2]))
-      try(jflex.2017 <- mk_P(m = m, m.par = jflex.params[,4], L = jL.list[2], U = jU.list[2]))
-      try(jflex.2018 <- mk_P(m = m, m.par = jflex.params[,5], L = jL.list[2], U = jU.list[2]))
+      try(jflex.2014 <- mk_P_ceiling(m = m, m.par = jflex.params[,1], L = jL.list[2], U = jU.list[2], U1 = jflex.params[8,1]))
+      try(jflex.2015 <- mk_P_ceiling(m = m, m.par = jflex.params[,2], L = jL.list[2], U = jU.list[2], U1 = jflex.params[8,2]))
+      try(jflex.2016 <- mk_P_ceiling(m = m, m.par = jflex.params[,3], L = jL.list[2], U = jU.list[2], U1 = jflex.params[8,3]))
+      try(jflex.2017 <- mk_P_ceiling(m = m, m.par = jflex.params[,4], L = jL.list[2], U = jU.list[2], U1 = jflex.params[8,4]))
+      try(jflex.2018 <- mk_P_ceiling(m = m, m.par = jflex.params[,5], L = jL.list[2], U = jU.list[2], U1 = jflex.params[8,5]))
       
       ## Gorgonia
-      try(jgorg.2013 <- mk_P(m = m, m.par = jgorg.params[,1], L = jL.list[3], U = jU.list[3]))
-      try(jgorg.2014 <- mk_P(m = m, m.par = jgorg.params[,2], L = jL.list[3], U = jU.list[3]))
-      try(jgorg.2015 <- mk_P(m = m, m.par = jgorg.params[,3], L = jL.list[3], U = jU.list[3]))
-      try(jgorg.2016 <- mk_P(m = m, m.par = jgorg.params[,4], L = jL.list[3], U = jU.list[3]))
-      try(jgorg.2017 <- mk_P(m = m, m.par = jgorg.params[,5], L = jL.list[3], U = jU.list[3]))
-      try(jgorg.2018 <- mk_P(m = m, m.par = jgorg.params[,6], L = jL.list[3], U = jU.list[3]))
+      try(jgorg.2013 <- mk_P_ceiling(m = m, m.par = jgorg.params[,1], L = jL.list[3], U = jU.list[3], U1 = jgorg.params[8,1]))
+      try(jgorg.2014 <- mk_P_ceiling(m = m, m.par = jgorg.params[,2], L = jL.list[3], U = jU.list[3], U1 = jgorg.params[8,2]))
+      try(jgorg.2015 <- mk_P_ceiling(m = m, m.par = jgorg.params[,3], L = jL.list[3], U = jU.list[3], U1 = jgorg.params[8,3]))
+      try(jgorg.2016 <- mk_P_ceiling(m = m, m.par = jgorg.params[,4], L = jL.list[3], U = jU.list[3], U1 = jgorg.params[8,4]))
+      try(jgorg.2017 <- mk_P_ceiling(m = m, m.par = jgorg.params[,5], L = jL.list[3], U = jU.list[3], U1 = jgorg.params[8,5]))
+      try(jgorg.2018 <- mk_P_ceiling(m = m, m.par = jgorg.params[,6], L = jL.list[3], U = jU.list[3], U1 = jgorg.params[8,6]))
  
    #### Calculate and store lambda ####     
       ## Antilogorgia

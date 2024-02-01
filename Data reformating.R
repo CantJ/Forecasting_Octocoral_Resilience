@@ -8,7 +8,6 @@
 
 # Primary Author: James Cant 
 # Email: james.cant91@gmail.com
-# Date last modified: March 2022
 # ---------------------------------------------------------------------------------
 
 #Clear the workspace
@@ -18,7 +17,7 @@ rm(list=ls(all=TRUE))
 library(plyr)
 
 # set working directory
-setwd("/Users/james/Documents/Gorgonian")
+setwd("DATA FILE DIRECTORY PATH")
 
 # Are you checking outliers?
 #Outliers = TRUE
@@ -26,9 +25,9 @@ Outliers = FALSE
 
 # load in the required data (na.strings fills empty cells) - the line of code used here depends on whether this script is being used to process the data with or without outliers checked.
 if(Outliers == FALSE){
-  Raw_data <- read.csv("Hurricane tags - IPM formatted.csv", na.strings=c("", "NA"), numerals = "no.loss") 
+  Raw_data <- read.csv("DATA FILE", na.strings=c("", "NA"), numerals = "no.loss") 
 } else {
-  Raw_data <- read.csv("Hurricane tags - IPM Final.csv", na.strings=c("", "NA"), numerals = "no.loss") 
+  Raw_data <- read.csv("DATA FILE", na.strings=c("", "NA"), numerals = "no.loss") 
 }
 
 ####################################################
@@ -164,7 +163,7 @@ New_data$Dead <- as.factor(New_data$Dead)
 
 # and save the file
 
-write.csv(New_data, "Transposed_data_2013_2019.csv", row.names = FALSE)
+write.csv(New_data, "NEW DATA FILE", row.names = FALSE)
 
 ####################################################
 # STEP 3: Transpose each separate species/site file and stack back together (ready for IPM analysis)
@@ -256,9 +255,9 @@ New_IPM_data$Hurricane <- as.factor(New_IPM_data$Hurricane)
 
 # and save the file
 if(Outliers == FALSE){
-  write.csv(New_IPM_data, "IPM_data_2013_2019.csv", row.names = FALSE)
+  write.csv(New_IPM_data, "IPM_DATA", row.names = FALSE)
 } else {
-  write.csv(New_IPM_data, "IPM_data_2013_2019_FINAL.csv", row.names = FALSE)
+  write.csv(New_IPM_data, "IPM_DATA_FINAL", row.names = FALSE)
 }
 
 ############### ------------------------------------------------------ END OF CODE -------------------------------------

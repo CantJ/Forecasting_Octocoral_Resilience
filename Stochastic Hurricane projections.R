@@ -1,8 +1,9 @@
 # This script is for running a series of simulations exploring the impacts of changing recurrent hurricane regimes on the dynamics and viability of
-# 3 different gorgonia populations: Gorgonia, Eunicea and Antillogorgia.
-# 
-# data last modified: Mar 2022
+# 3 different gorgonian populations: Gorgonia, Eunicea and Antillogorgia.
+
 # Author: James Cant
+# Contact: james.cant91@gmail.com
+#-----------------------------------
 
 # Load required packages
 library(areaplot)
@@ -13,8 +14,6 @@ set.seed(44736)
 ###############################################
 # STEP 1: Calculate final model projection parameters
 ###############################################
-# reset plot window
-set_graph_pars("panel1")
 
 # determine bin widths for integrating the population
 h.store = (U.list-L.list)/m # bin widths
@@ -40,12 +39,15 @@ for(i in 1:3) {
 # all of the storage vectors are ordered as 1 = Antillogorgia, 2 = Eunicea, 3 = Gorgonia.
 
 # define simulation details
-dates <- 2018:2150 # Projection dates
+dates <- 2019:2100 # Projection dates
 tmax = length(dates) # iteration length
 sim <- 1000 # number of simulations
 
-# set up one storage matrix for each species under each simulation
+# set up storage matrices for each species under each simulation
+# One for population integral
 ant.nt <- flex.nt <- gorg.nt <- list(matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax))
+# And one for population vector
+ant.vec <- flex.vec <- gorg.vec <- list(matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax), matrix(NA, m, tmax))
 # and set up storage for total population size
 ant.Nt <- flex.Nt <- gorg.Nt <- list(numeric(tmax), numeric(tmax), numeric(tmax), numeric(tmax), numeric(tmax), numeric(tmax), numeric(tmax))
 
@@ -58,6 +60,10 @@ gorg.nt[[1]][,1] <- gorg.nt[[2]][,1] <- gorg.nt[[3]][,1] <- gorg.nt[[4]][,1] <- 
 ant.Nt[[1]][1] <- ant.Nt[[2]][1] <- ant.Nt[[3]][1] <- ant.Nt[[4]][1] <- ant.Nt[[5]][1] <- ant.Nt[[6]][1] <- ant.Nt[[7]][1] <- h.store[1] * sum(initial.pop.integral[[1]])
 flex.Nt[[1]][1] <- flex.Nt[[2]][1] <- flex.Nt[[3]][1] <- flex.Nt[[4]][1] <- flex.Nt[[5]][1] <- flex.Nt[[6]][1] <- flex.Nt[[7]][1] <- h.store[2] * sum(initial.pop.integral[[2]])
 gorg.Nt[[1]][1] <- gorg.Nt[[2]][1] <- gorg.Nt[[3]][1] <- gorg.Nt[[4]][1] <- gorg.Nt[[5]][1] <- gorg.Nt[[6]][1] <- gorg.Nt[[7]][1] <- h.store[3] * sum(initial.pop.integral[[3]]) 
+# initial population vector
+ant.vec[[1]][,1] <- ant.vec[[2]][,1] <- ant.vec[[3]][,1] <- ant.vec[[4]][,1] <- ant.vec[[5]][,1] <- ant.vec[[6]][,1] <- ant.vec[[7]][,1] <- initial.pop.integral[[1]]/sum(initial.pop.integral[[1]]/sum(h.store[1]*initial.pop.integral[[1]]))
+flex.vec[[1]][,1] <- flex.vec[[2]][,1] <- flex.vec[[3]][,1] <- flex.vec[[4]][,1] <- flex.vec[[5]][,1] <- flex.vec[[6]][,1] <- flex.vec[[7]][,1] <- initial.pop.integral[[2]]/sum(initial.pop.integral[[2]]/sum(h.store[2]*initial.pop.integral[[2]]))
+gorg.vec[[1]][,1] <- gorg.vec[[2]][,1] <- gorg.vec[[3]][,1] <- gorg.vec[[4]][,1] <- gorg.vec[[5]][,1] <- gorg.vec[[6]][,1] <- gorg.vec[[7]][,1] <- initial.pop.integral[[3]]/sum(initial.pop.integral[[3]]/sum(h.store[3]*initial.pop.integral[[3]]))
 
 # Because recruitment also relies on total colony density this needs saving.
 total.Nt <- list(numeric(tmax), numeric(tmax), numeric(tmax), numeric(tmax), numeric(tmax), numeric(tmax), numeric(tmax))
@@ -90,25 +96,25 @@ av_return <- 1/mean(Keim_data) # ~0.0865% likelihood.
 # Scenarios 2,3 & 4: declining Hurricane frequency 
 # Create probability vector representing the projected decline in Hurricane frequencies reported in Knutson 2019 for each of the above return time regimes.
 # Minimum estimated return time regime:
-min.mid.century <- seq(min_return, min_return-(min_return*0.2), length.out = length(2018:2055)) # this reflects a 20% decline by 2055
+min.mid.century <- seq(min_return, min_return-(min_return*0.2), length.out = length(2019:2055)) # this reflects a 20% decline by 2055
 # but what annual change  does this equate to?
 min.ann.change <- (max(min.mid.century)-min(min.mid.century))/length(min.mid.century)
 # now ensure the probability of hurricanes changes annually at the same rate until the end of the century.
 hurricane.prob2 <- c(min.mid.century, seq(min(min.mid.century)-min.ann.change, min(min.mid.century)-(min.ann.change*(tmax-length(min.mid.century))), length.out = tmax-length(min.mid.century))) # hurricane declines will continue at the same rate until the end of the time series
 # and repeat for the other return time regimes:
 # Maximum estimated return time regime:
-max.mid.century <- seq(max_return, max_return-(max_return*0.2), length.out = length(2018:2055))
+max.mid.century <- seq(max_return, max_return-(max_return*0.2), length.out = length(2019:2055))
 max.ann.change <- (max(max.mid.century)-min(max.mid.century))/length(max.mid.century)
 hurricane.prob3 <- c(max.mid.century, seq(min(max.mid.century)-max.ann.change, min(max.mid.century)-(max.ann.change*(tmax-length(max.mid.century))), length.out = tmax-length(max.mid.century))) 
 # Mean estimated return time regime:
-av.mid.century <- seq(av_return, av_return-(av_return*0.2), length.out = length(2018:2055))
+av.mid.century <- seq(av_return, av_return-(av_return*0.2), length.out = length(2019:2055))
 av.ann.change <- (max(av.mid.century)-min(av.mid.century))/length(av.mid.century)
 hurricane.prob4 <- c(av.mid.century, seq(min(av.mid.century)-av.ann.change, min(av.mid.century)-(av.ann.change*(tmax-length(av.mid.century))), length.out = tmax-length(av.mid.century))) 
 
 # Scenarios 5,6, & 7: Increasing Hurricane occurrence
 # Create probability vector representing the projected increase in Hurricane frequencies reported in Bhatia 2018 for each of the above return time regimes.
 # Minimum estimated return time regime:
-min.2035 <- seq(min_return, min_return+(min_return*0.125), length.out = length(2018:2035)) # this reflects a 12.5% increase by 2035
+min.2035 <- seq(min_return, min_return+(min_return*0.125), length.out = length(2019:2035)) # this reflects a 12.5% increase by 2035
 min.2100 <- seq(max(min.2035), min_return+(min_return*0.25), length.out = length(2035:2100)) # this continues the increase reaching 25% by 2100
 # but what annual change  does this equate to?
 min.ann.change <- (max(min.2100)-min(min.2100))/length(min.2100)
@@ -116,21 +122,28 @@ min.ann.change <- (max(min.2100)-min(min.2100))/length(min.2100)
 hurricane.prob5 <- c(min.2035, min.2100[-1], seq(max(min.2100)+min.ann.change, max(min.2100)+(min.ann.change*(tmax-(length(min.2035)+length(min.2100[-1])))), length.out = tmax-(length(min.2035)+length(min.2100[-1])))) # hurricane increases will continue at the same rate until the end of the time series
 # and repeat for the other return time regimes:
 # Maximum estimated return time regime:
-max.2035 <- seq(max_return, max_return+(max_return*0.125), length.out = length(2018:2035)) 
+max.2035 <- seq(max_return, max_return+(max_return*0.125), length.out = length(2019:2035)) 
 max.2100 <- seq(max(max.2035), max_return+(max_return*0.25), length.out = length(2035:2100))
 max.ann.change <- (max(max.2100)-min(max.2100))/length(max.2100)
 hurricane.prob6 <- c(max.2035, max.2100[-1], seq(max(max.2100)+max.ann.change, max(max.2100)+(max.ann.change*(tmax-(length(max.2035)+length(max.2100[-1])))), length.out = tmax-(length(max.2035)+length(max.2100[-1])))) 
 # Mean estimated return time regime:
-av.2035 <- seq(av_return, av_return+(av_return*0.125), length.out = length(2018:2035)) 
+av.2035 <- seq(av_return, av_return+(av_return*0.125), length.out = length(2019:2035)) 
 av.2100 <- seq(max(av.2035), av_return+(av_return*0.25), length.out = length(2035:2100)) 
 av.ann.change <- (max(av.2100)-min(av.2100))/length(av.2100)
 hurricane.prob7 <- c(av.2035, av.2100[-1], seq(max(av.2100)+av.ann.change, max(av.2100)+(av.ann.change*(tmax-(length(av.2035)+length(av.2100[-1])))), length.out = tmax-(length(av.2035)+length(av.2100[-1]))))
 
-# create overall storage dataframe
-ant.store <- flex.store <- gorg.store <- list(matrix(NA, sim, tmax), matrix(NA, sim, tmax), matrix(NA, sim, tmax), matrix(NA, sim, tmax), matrix(NA, sim, tmax), matrix(NA, sim, tmax), matrix(NA, sim, tmax))
+# create overall storage dataframes
+ant.store <- flex.store <- gorg.store <- replicate(7, matrix(NA, sim, tmax), simplify = FALSE) 
 colnames(ant.store[[1]]) <- colnames(flex.store[[1]]) <- colnames(gorg.store[[1]]) <- colnames(ant.store[[2]]) <- colnames(flex.store[[2]]) <- colnames(gorg.store[[2]]) <-colnames(ant.store[[3]]) <- colnames(flex.store[[3]]) <- colnames(gorg.store[[3]]) <- dates
 colnames(ant.store[[4]]) <- colnames(flex.store[[4]]) <- colnames(gorg.store[[4]]) <- colnames(ant.store[[5]]) <- colnames(flex.store[[5]]) <- colnames(gorg.store[[5]]) <-colnames(ant.store[[6]]) <- colnames(flex.store[[6]]) <- colnames(gorg.store[[6]]) <- dates
 colnames(ant.store[[7]]) <- colnames(flex.store[[7]]) <- colnames(gorg.store[[7]]) <- dates
+# somewhere to store recruits
+recruit.store <- replicate(3*7, matrix(NA, sim, tmax), simplify = FALSE)
+# somewhere to store population vectors
+ant.vec.store <- replicate(7, matrix(NA, m, tmax), simplify = FALSE)
+flex.vec.store <- replicate(7, matrix(NA, m, tmax), simplify = FALSE)
+gorg.vec.store <- replicate(7, matrix(NA, m, tmax), simplify = FALSE)
+
 # somewhere to store lambda s
 lambdas.store <- matrix(NA, nrow = sim, ncol = 3*7) # seven columns for each species (one for each scenario)
 colnames(lambdas.store) <- c("Antillogorgia.1", "Eunicea.1", "Gorgonia.1", "Antillogorgia.2", "Eunicea.2", "Gorgonia.2", "Antillogorgia.3", "Eunicea.3", "Gorgonia.3",
@@ -166,86 +179,92 @@ for(ii in 1:7){
       # for each step of the forecast first determining if a hurricane should happen
       prob <- runif(1, min = 0, max = 1)
       
-      # The population data being used to define initial population structure was collected in 2018 (not 2019, from which we have demographic data) 
-      # therefore the simulation is forced to follow the dynamics calculated for the 2018/19 period in order to better reflect reality.
-      if(t == 2) {
-        # Here all IPMs will be constructed using 2018/19 coefficients.
+      # when the model is in a hurricane year - use the parameters measured during 2017/18
+      if (prob < Hurricane[t]){ 
+        # the model will run through each species separately
         # Antillogorgia
-        P.a <- mk_P(m = m, m.par = ant.params[,6], L = L.list[1], U = U.list[1]) # calculate the IPM matrix for the singular time step.
-        ant.nt[[ii]][,t] <- Iterate.a(nt = ant.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.a$meshpts, P = P.a$P, m.par = ant.params[,6]) 
+        P.a <- mk_P_ceiling(m = m, m.par = ant.params[,5], L = L.list[1], U = U.list[1], U1 = ant.params[15,5]) # calculate the IPM matrix for the singular time step.
+        Temp_a <- Iterate(nt = ant.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.a$meshpts, P = P.a$P, m.par = ant.params[,5])
+        ant.nt[[ii]][,t] <- Temp_a$main 
         ant.Nt[[ii]][t] <- h.store[1] * sum(ant.nt[[ii]][,t])
-        
+        recruit.store[[ii]][s,t] <- Temp_a$R
+        ant.vec[[ii]][,t] <- ant.nt[[ii]][,t]/sum(ant.nt[[ii]][,t]/sum(h.store[1]*ant.nt[[ii]][,t]))
+          
         # Eunicea
-        P.e <- mk_P(m = m, m.par = flex.params[,5], L = L.list[2], U = U.list[2]) # calculate the IPM matrix for the singular time step.
-        flex.nt[[ii]][,t] <- Iterate.e(nt = flex.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.e$meshpts, P = P.e$P, m.par = flex.params[,5]) 
+        P.e <- mk_P_ceiling(m = m, m.par = flex.params[,4], L = L.list[2], U = U.list[2], U1 = flex.params[15,4]) # calculate the IPM matrix for the singular time step.
+        Temp_e <- Iterate(nt = flex.nt[[ii]][,t-1], Nt = flex.Nt[[ii]][t-1], meshpts = P.e$meshpts, P = P.e$P, m.par = flex.params[,4])
+        flex.nt[[ii]][,t] <- Temp_e$main 
         flex.Nt[[ii]][t] <- h.store[2] * sum(flex.nt[[ii]][,t])
+        recruit.store[[ii+7]][s,t] <- Temp_e$R
+        flex.vec[[ii]][,t] <- flex.nt[[ii]][,t]/sum(flex.nt[[ii]][,t]/sum(h.store[2]*flex.nt[[ii]][,t]))
         
         # Gorgonia
-        P.g <- mk_P(m = m, m.par = gorg.params[,6], L = L.list[3], U = U.list[3]) # calculate the IPM matrix for the singular time step.
-        gorg.nt[[ii]][,t] <- Iterate.g(nt = gorg.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.g$meshpts, P = P.g$P, m.par = gorg.params[,6]) 
+        P.g <- mk_P_ceiling(m = m, m.par = gorg.params[,5], L = L.list[3], U = U.list[3], U1 = gorg.params[15,5]) # calculate the IPM matrix for the singular time step.
+        Temp_g <- Iterate(nt = gorg.nt[[ii]][,t-1], Nt = gorg.Nt[[ii]][t-1], meshpts = P.g$meshpts, P = P.g$P, m.par = gorg.params[,5])
+        gorg.nt[[ii]][,t] <- Temp_g$main 
         gorg.Nt[[ii]][t] <- h.store[3] * sum(gorg.nt[[ii]][,t])
+        recruit.store[[ii+14]][s,t] <- Temp_g$R
+        gorg.vec[[ii]][,t] <- gorg.nt[[ii]][,t]/sum(gorg.nt[[ii]][,t]/sum(h.store[3]*gorg.nt[[ii]][,t]))
         
-      } else { 
-        # otherwise the simulation uses the preassigned probabilities to determine hurricane liklihood.
-        # when the model is in a hurricane year - use the parameters measured during 2017/18
-        if (prob < Hurricane[t]){ 
-          # the model will run through each species separately
-          # Antillogorgia
-          P.a <- mk_P(m = m, m.par = ant.params[,5], L = L.list[1], U = U.list[1]) # calculate the IPM matrix for the singular time step.
-          ant.nt[[ii]][,t] <- Iterate.a(nt = ant.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.a$meshpts, P = P.a$P, m.par = ant.params[,5]) 
-          ant.Nt[[ii]][t] <- h.store[1] * sum(ant.nt[[ii]][,t-1])
-            
-          # Eunicea
-          P.e <- mk_P(m = m, m.par = flex.params[,4], L = L.list[2], U = U.list[2]) # calculate the IPM matrix for the singular time step.
-          flex.nt[[ii]][,t] <- Iterate.e(nt = flex.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.e$meshpts, P = P.e$P, m.par = flex.params[,4]) 
-          flex.Nt[[ii]][t] <- h.store[2] * sum(flex.nt[[ii]][,t])
-            
-          # Gorgonia
-          P.g <- mk_P(m = m, m.par = gorg.params[,5], L = L.list[3], U = U.list[3]) # calculate the IPM matrix for the singular time step.
-          gorg.nt[[ii]][,t] <- Iterate.g(nt = gorg.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.g$meshpts, P = P.g$P, m.par = gorg.params[,5]) 
-          gorg.Nt[[ii]][t] <- h.store[3] * sum(gorg.nt[[ii]][,t])
-            
-          # record that a hurricane occurred
-          Recovery.years[t] <- 1
-          
+        # record that a hurricane occurred
+        Recovery.years[t] <- 1
+        
         # if a hurricane does not occur the model needs to determine if it is in a recovery state or not
-        } else {
-          if (Recovery.years[t-1] == 1){ #the year following a hurricane is recovery dynamics
-            # Antillogorgia
-            P.a <- mk_P(m = m, m.par = ant.params[,6], L = L.list[1], U = U.list[1]) # calculate the IPM matrix for the singular time step.
-            ant.nt[[ii]][,t] <- Iterate.a(nt = ant.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.a$meshpts, P = P.a$P, m.par = ant.params[,6]) 
-            ant.Nt[[ii]][t] <- h.store[1] * sum(ant.nt[[ii]][,t])
-              
-            # Eunicea
-            P.e <- mk_P(m = m, m.par = flex.params[,5], L = L.list[2], U = U.list[2]) # calculate the IPM matrix for the singular time step.
-            flex.nt[[ii]][,t] <- Iterate.e(nt = flex.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.e$meshpts, P = P.e$P, m.par = flex.params[,5]) 
-            flex.Nt[[ii]][t] <- h.store[2] * sum(flex.nt[[ii]][,t])
-              
-            # Gorgonia
-            P.g <- mk_P(m = m, m.par = gorg.params[,6], L = L.list[3], U = U.list[3]) # calculate the IPM matrix for the singular time step.
-            gorg.nt[[ii]][,t] <- Iterate.g(nt = gorg.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.g$meshpts, P = P.g$P, m.par = gorg.params[,6]) 
-            gorg.Nt[[ii]][t] <- h.store[3] * sum(gorg.nt[[ii]][,t])
+      } else {
+        if (Recovery.years[t-1] == 1){ #the year following a hurricane is recovery dynamics
+          # Antillogorgia
+          P.a <- mk_P_ceiling(m = m, m.par = ant.params[,6], L = L.list[1], U = U.list[1], U1 = ant.params[15,6]) # calculate the IPM matrix for the singular time step.
+          Temp_a <- Iterate(nt = ant.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.a$meshpts, P = P.a$P, m.par = ant.params[,6])
+          ant.nt[[ii]][,t] <- Temp_a$main 
+          ant.Nt[[ii]][t] <- h.store[1] * sum(ant.nt[[ii]][,t])
+          recruit.store[[ii]][s,t] <- Temp_a$R
+          ant.vec[[ii]][,t] <- ant.nt[[ii]][,t]/sum(ant.nt[[ii]][,t]/sum(h.store[1]*ant.nt[[ii]][,t]))
           
-          } else { # if the simulation is not in a hurricane year, nor a recovery year, then the loop will randomly select transitions from the "good" years
-            m.par.ant <- ant.params[,sample(1:4,1)] #randomly selects a column from the good year columns of the m.par matrices
-            m.par.flex <- flex.params[,sample(1:3,1)]
-            m.par.gorg <- gorg.params[,sample(1:4,1)]
-              
-            # Antillogorgia
-            P.a <- mk_P(m = m, m.par = m.par.ant, L = L.list[1], U = U.list[1]) # calculate the IPM matrix for the singular time step.
-            ant.nt[[ii]][,t] <- Iterate.a(nt = ant.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.a$meshpts, P = P.a$P, m.par = m.par.ant) 
-            ant.Nt[[ii]][t] <- h.store[1] * sum(ant.nt[[ii]][,t])
-              
-            # Eunicea
-            P.e <- mk_P(m = m, m.par = m.par.flex, L = L.list[2], U = U.list[2]) # calculate the IPM matrix for the singular time step.
-            flex.nt[[ii]][,t] <- Iterate.e(nt = flex.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.e$meshpts, P = P.e$P, m.par = m.par.flex) 
-            flex.Nt[[ii]][t] <- h.store[2] * sum(flex.nt[[ii]][,t])
-              
-            # Gorgonia
-            P.g <- mk_P(m = m, m.par = m.par.gorg, L = L.list[3], U = U.list[3]) # calculate the IPM matrix for the singular time step.
-            gorg.nt[[ii]][,t] <- Iterate.g(nt = gorg.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.g$meshpts, P = P.g$P, m.par = m.par.gorg) 
-            gorg.Nt[[ii]][t] <- h.store[3] * sum(gorg.nt[[ii]][,t])
-          }}
+          # Eunicea
+          P.e <- mk_P_ceiling(m = m, m.par = flex.params[,5], L = L.list[2], U = U.list[2], U1 = flex.params[15,5]) # calculate the IPM matrix for the singular time step.
+          Temp_e <- Iterate(nt = flex.nt[[ii]][,t-1], Nt = flex.Nt[[ii]][t-1], meshpts = P.e$meshpts, P = P.e$P, m.par = flex.params[,5])
+          flex.nt[[ii]][,t] <- Temp_e$main 
+          flex.Nt[[ii]][t] <- h.store[2] * sum(flex.nt[[ii]][,t])
+          recruit.store[[ii+7]][s,t] <- Temp_e$R
+          flex.vec[[ii]][,t] <- flex.nt[[ii]][,t]/sum(flex.nt[[ii]][,t]/sum(h.store[2]*flex.nt[[ii]][,t]))
+          
+          # Gorgonia
+          P.g <- mk_P_ceiling(m = m, m.par = gorg.params[,6], L = L.list[3], U = U.list[3], U1 = gorg.params[15,6]) # calculate the IPM matrix for the singular time step.
+          Temp_g <- Iterate(nt = gorg.nt[[ii]][,t-1], Nt = gorg.Nt[[ii]][t-1], meshpts = P.g$meshpts, P = P.g$P, m.par = gorg.params[,6])
+          gorg.nt[[ii]][,t] <- Temp_g$main 
+          gorg.Nt[[ii]][t] <- h.store[3] * sum(gorg.nt[[ii]][,t])
+          recruit.store[[ii+14]][s,t] <- Temp_g$R
+          gorg.vec[[ii]][,t] <- gorg.nt[[ii]][,t]/sum(gorg.nt[[ii]][,t]/sum(h.store[3]*gorg.nt[[ii]][,t]))
+        
+        } else { # if the simulation is not in a hurricane year, nor a recovery year, then the loop will randomly select transitions from the "good" years
+          m.par.ant <- ant.params[,sample(1:4,1)] #randomly selects a column from the good year columns of the m.par matrices
+          m.par.flex <- flex.params[,sample(1:3,1)]
+          m.par.gorg <- gorg.params[,sample(1:4,1)]
+          
+          # Antillogorgia
+          P.a <- mk_P_ceiling(m = m, m.par = m.par.ant, L = L.list[1], U = U.list[1], U1 = m.par.ant[15]) # calculate the IPM matrix for the singular time step.
+          Temp_a <- Iterate(nt = ant.nt[[ii]][,t-1], Nt = total.Nt[[ii]][t-1], meshpts = P.a$meshpts, P = P.a$P, m.par = m.par.ant)
+          ant.nt[[ii]][,t] <- Temp_a$main 
+          ant.Nt[[ii]][t] <- h.store[1] * sum(ant.nt[[ii]][,t])
+          recruit.store[[ii]][s,t] <- Temp_a$R
+          ant.vec[[ii]][,t] <- ant.nt[[ii]][,t]/sum(ant.nt[[ii]][,t]/sum(h.store[1]*ant.nt[[ii]][,t]))
+          
+          # Eunicea
+          P.e <- mk_P_ceiling(m = m, m.par = m.par.flex, L = L.list[2], U = U.list[2], U1 = m.par.flex[15]) # calculate the IPM matrix for the singular time step.
+          Temp_e <- Iterate(nt = flex.nt[[ii]][,t-1], Nt = flex.Nt[[ii]][t-1], meshpts = P.e$meshpts, P = P.e$P, m.par = m.par.flex)
+          flex.nt[[ii]][,t] <- Temp_e$main 
+          flex.Nt[[ii]][t] <- h.store[2] * sum(flex.nt[[ii]][,t])
+          recruit.store[[ii+7]][s,t] <- Temp_e$R
+          flex.vec[[ii]][,t] <- flex.nt[[ii]][,t]/sum(flex.nt[[ii]][,t]/sum(h.store[2]*flex.nt[[ii]][,t]))
+          
+          # Gorgonia
+          P.g <- mk_P_ceiling(m = m, m.par = m.par.gorg, L = L.list[3], U = U.list[3], U1 = m.par.gorg[15]) # calculate the IPM matrix for the singular time step.
+          Temp_g <- Iterate(nt = gorg.nt[[ii]][,t-1], Nt = gorg.Nt[[ii]][t-1], meshpts = P.g$meshpts, P = P.g$P, m.par = m.par.gorg)
+          gorg.nt[[ii]][,t] <- Temp_g$main 
+          gorg.Nt[[ii]][t] <- h.store[3] * sum(gorg.nt[[ii]][,t])
+          recruit.store[[ii+14]][s,t] <- Temp_g$R
+          gorg.vec[[ii]][,t] <- gorg.nt[[ii]][,t]/sum(gorg.nt[[ii]][,t]/sum(h.store[3]*gorg.nt[[ii]][,t]))
+        }
       }
       # at the end of each loop save the total populations size
       total.Nt[[ii]][t] <- ant.Nt[[ii]][t] + flex.Nt[[ii]][t] + gorg.Nt[[ii]][t]
@@ -254,6 +273,14 @@ for(ii in 1:7){
     ant.store[[ii]][s,] <- ant.Nt[[ii]]
     flex.store[[ii]][s,] <- flex.Nt[[ii]]
     gorg.store[[ii]][s,] <- gorg.Nt[[ii]]
+    
+    # Re-estimate and store the mean population vector for each time step
+    Ant.array <- array(c(ant.vec.store[[ii]], ant.vec[[ii]]), c(m, tmax, 2))
+    ant.vec.store[[ii]] <- rowMeans(Ant.array, dims = 2, na.rm = T)
+    Flex.array <- array(c(flex.vec.store[[ii]], flex.vec[[ii]]), c(m, tmax, 2))
+    flex.vec.store[[ii]] <- rowMeans(Flex.array, dims = 2, na.rm = T)
+    Gorg.array <- array(c(gorg.vec.store[[ii]], gorg.vec[[ii]]), c(m, tmax, 2))
+    gorg.vec.store[[ii]] <- rowMeans(Gorg.array, dims = 2, na.rm = T)
     
     # and calculate lambda s for each simulation
     # create blank storage  
@@ -314,7 +341,7 @@ ymax <- max(round((max(apply(flex.store[[1]], 2, CI)[1,])+50), digits = -2), # S
             round((max(apply(flex.store[[7]], 2, CI)[1,])+50), digits = -2)) # Scenario 7
 
 # Manually defining ymax can help to expand some of the visuals for the manuscript
-ymax <- 300
+ymax <- 420
 
 # plot each scenario
 ##### Scenario 1: No Hurricane
@@ -371,7 +398,7 @@ legend(x = 2030, y = ymax,
        cex = 1.5,
        bty = "n")
 
-# For the remaining plots combine together scenarios dealing with the same initial conidtions (e.g. min, mean and max return time)
+# For the remaining plots combine together scenarios dealing with the same initial conditions (e.g. min, mean and max return time)
 ##### Minimum return time
 # Eunicea
 # Scenario 2: Decreasing hurricane likelihood
@@ -627,5 +654,324 @@ lambdaS.model <- aov(lambdaS ~ Species + Scenario + Species:Scenario, data = lam
 car::Anova(lambdaS.model, type = "II")
 # and identify where this significance lies
 TukeyHSD(lambdaS.model)
+
+### Visualize recruitment variability across years and scenarios -----------------------------
+
+# what is my max y value across each scenario
+ymax2 <- ceiling(max(apply(recruit.store[[8]], 2, mean), # Scenario 1
+            apply(recruit.store[[9]], 2, mean), # Scenario 2
+            apply(recruit.store[[10]], 2, mean), # Scenario 3 
+            apply(recruit.store[[11]], 2, mean), # Scenario 4
+            apply(recruit.store[[12]], 2, mean), # Scenario 5 
+            apply(recruit.store[[13]], 2, mean), # Scenario 6
+            apply(recruit.store[[14]], 2, mean), na.rm = TRUE)) # Scenario 7
+
+# Manually defining ymax can help to expand some of the visuals for the manuscript
+ymax2 <- 200
+
+# plot recruitment across each scenario
+##### Scenario 1: No Hurricane
+# Eunicea
+plot(x = dates, apply(recruit.store[[8]], 2, max), typ = "n", ylim = c(0, ymax2), yaxs = "i", xaxs = "i",
+     xlab = "",
+     ylab = "",
+     cex.axis = 1.5)
+points(x = dates, apply(recruit.store[[8]], 2, mean), typ = "l", lty = "solid", col = "#0072B2", lwd = 1)
+# Antilogorgia 
+points(x = dates, apply(recruit.store[[1]], 2, mean), typ = "l", lty = "solid", col = "#D55E00", lwd = 1)
+# Gorgonia 
+points(x = dates, apply(recruit.store[[15]], 2, mean), typ = "l", lty = "solid", col = "#000000", lwd = 1)
+
+##### Minimum return time
+plot(x = dates, apply(recruit.store[[8]], 2, mean), typ = "n", ylim = c(0, ymax2), yaxs = "i", xaxs = "i",
+     xlab = "",
+     ylab = "",
+     cex.axis = 1.5)
+# Scenario 2: Decreasing hurricane likelihood
+# Eunicea
+points(x = dates, apply(recruit.store[[9]], 2, mean), typ = "l", lty = "solid", col = "#0072B2", lwd = 1)
+# Antilogorgia 
+points(x = dates, apply(recruit.store[[2]], 2, CI)[2,], typ = "l", lty = "solid", col = "#D55E00", lwd = 1)
+# Gorgonia 
+points(x = dates, apply(recruit.store[[16]], 2, CI)[2,], typ = "l", lty = "solid", col = "#000000", lwd = 1)
+# Scenario 5: Increasing hurricane likelihood
+# Eunicea
+points(x = dates, apply(recruit.store[[12]], 2, CI)[2,], typ = "l", lty = "dashed", col = "blue", lwd = 1)
+# Antilogorgia
+points(x = dates, apply(recruit.store[[5]], 2, CI)[2,], typ = "l", lty = "dashed", col = "red", lwd = 1)
+# Gorgonia 
+points(x = dates, apply(recruit.store[[19]], 2, CI)[2,], typ = "l", lty = "dashed", col = "black", lwd = 1)
+
+##### Maximum return time
+plot(x = dates, apply(recruit.store[[8]], 2, mean), typ = "n", ylim = c(0, ymax2), yaxs = "i", xaxs = "i",
+     xlab = "",
+     ylab = "",
+     cex.axis = 1.5)
+# Scenario 2: Decreasing hurricane likelihood
+# Eunicea
+points(x = dates, apply(recruit.store[[11]], 2, mean), typ = "l", lty = "solid", col = "#0072B2", lwd = 1)
+# Antilogorgia 
+points(x = dates, apply(recruit.store[[4]], 2, CI)[2,], typ = "l", lty = "solid", col = "#D55E00", lwd = 1)
+# Gorgonia 
+points(x = dates, apply(recruit.store[[18]], 2, CI)[2,], typ = "l", lty = "solid", col = "#000000", lwd = 1)
+# Scenario 5: Increasing hurricane likelihood
+# Eunicea
+points(x = dates, apply(recruit.store[[14]], 2, CI)[2,], typ = "l", lty = "dashed", col = "blue", lwd = 1)
+# Antilogorgia
+points(x = dates, apply(recruit.store[[7]], 2, CI)[2,], typ = "l", lty = "dashed", col = "red", lwd = 1)
+# Gorgonia 
+points(x = dates, apply(recruit.store[[21]], 2, CI)[2,], typ = "l", lty = "dashed", col = "black", lwd = 1)
+
+##### Mean return time
+plot(x = dates, apply(recruit.store[[8]], 2, mean), typ = "n", ylim = c(0, ymax2), yaxs = "i", xaxs = "i",
+     xlab = "",
+     ylab = "",
+     cex.axis = 1.5)
+# Scenario 2: Decreasing hurricane likelihood
+# Eunicea
+points(x = dates, apply(recruit.store[[10]], 2, mean), typ = "l", lty = "solid", col = "#0072B2", lwd = 1)
+# Antilogorgia 
+points(x = dates, apply(recruit.store[[3]], 2, CI)[2,], typ = "l", lty = "solid", col = "#D55E00", lwd = 1)
+# Gorgonia 
+points(x = dates, apply(recruit.store[[17]], 2, CI)[2,], typ = "l", lty = "solid", col = "#000000", lwd = 1)
+# Scenario 5: Increasing hurricane likelihood
+# Eunicea
+points(x = dates, apply(recruit.store[[13]], 2, CI)[2,], typ = "l", lty = "dashed", col = "blue", lwd = 1)
+# Antilogorgia
+points(x = dates, apply(recruit.store[[6]], 2, CI)[2,], typ = "l", lty = "dashed", col = "red", lwd = 1)
+# Gorgonia 
+points(x = dates, apply(recruit.store[[20]], 2, CI)[2,], typ = "l", lty = "dashed", col = "black", lwd = 1)
+
+### Visualize population state distributions across years and scenarios -----------------------------
+
+# First extract a series of colony sizes from bin bounds vectors for use as x-axis labels.
+Xaxis_ant <- round(bin.bounds[[1]][c(1,50,100,150,200)])
+Xaxis_flex <- round(bin.bounds[[2]][c(1,50,100,150,200)])
+Xaxis_gorg <- round(bin.bounds[[3]][c(1,50,100,150,200)])
+
+# First plot size distribution projections for the non-hurricane scenario for each species
+# These will go into the main manuscript.
+
+# Antillogorgia
+matplot(ant.vec.store[[1]], typ = "n", ylim = c(0, 10), yaxs = "i", xaxs = "i",
+     xlab = "",
+     ylab = "",
+     cex.axis = 1.5,
+     xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_ant, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(ant.vec.store[[1]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(ant.vec.store[[1]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(ant.vec.store[[1]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(ant.vec.store[[1]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(ant.vec.store[[1]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(ant.vec.store[[1]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(ant.vec.store[[1]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+
+# Eunicea
+matplot(flex.vec.store[[1]], typ = "n", ylim = c(0, 12), yaxs = "i", xaxs = "i",
+        xlab = "",
+        ylab = "",
+        cex.axis = 1.5,
+        xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_flex, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(flex.vec.store[[1]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(flex.vec.store[[1]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(flex.vec.store[[1]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(flex.vec.store[[1]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(flex.vec.store[[1]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(flex.vec.store[[1]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(flex.vec.store[[1]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+
+# Gorgonia
+matplot(gorg.vec.store[[1]], typ = "n", ylim = c(0, 10), yaxs = "i", xaxs = "i",
+        xlab = "",
+        ylab = "",
+        cex.axis = 1.5,
+        xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_gorg, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(gorg.vec.store[[1]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(gorg.vec.store[[1]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(gorg.vec.store[[1]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(gorg.vec.store[[1]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(gorg.vec.store[[1]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(gorg.vec.store[[1]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(gorg.vec.store[[1]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+
+# Next plot all remaining scenarios for Supplementary
+# Scenario 2
+# Antillogorgia
+matplot(ant.vec.store[[2]], typ = "n", ylim = c(0, 11), yaxs = "i", xaxs = "i",
+        xlab = "",
+        ylab = "",
+        cex.axis = 1.5,
+        xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_ant, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(ant.vec.store[[2]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(ant.vec.store[[2]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(ant.vec.store[[2]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(ant.vec.store[[2]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(ant.vec.store[[2]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(ant.vec.store[[2]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(ant.vec.store[[2]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+
+# Eunicea
+matplot(flex.vec.store[[2]], typ = "n", ylim = c(0, 12), yaxs = "i", xaxs = "i",
+        xlab = "",
+        ylab = "",
+        cex.axis = 1.5,
+        xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_flex, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(flex.vec.store[[2]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(flex.vec.store[[2]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(flex.vec.store[[2]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(flex.vec.store[[2]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(flex.vec.store[[2]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(flex.vec.store[[2]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(flex.vec.store[[2]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+
+# Gorgonia
+matplot(gorg.vec.store[[2]], typ = "n", ylim = c(0, 10), yaxs = "i", xaxs = "i",
+        xlab = "",
+        ylab = "",
+        cex.axis = 1.5,
+        xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_gorg, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(gorg.vec.store[[2]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(gorg.vec.store[[2]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(gorg.vec.store[[2]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(gorg.vec.store[[2]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(gorg.vec.store[[2]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(gorg.vec.store[[2]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(gorg.vec.store[[2]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+
+# Scenarios 3 - 7
+# Antillogorgia
+matplot(ant.vec.store[[7]], typ = "n", ylim = c(0, 8), yaxs = "i", xaxs = "i",
+        xlab = "",
+        ylab = "",
+        cex.axis = 1.5,
+        xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_ant, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(ant.vec.store[[7]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(ant.vec.store[[7]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(ant.vec.store[[7]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(ant.vec.store[[7]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(ant.vec.store[[7]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(ant.vec.store[[7]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(ant.vec.store[[7]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+
+# Eunicea
+matplot(flex.vec.store[[7]], typ = "n", ylim = c(0, 9), yaxs = "i", xaxs = "i",
+        xlab = "",
+        ylab = "",
+        cex.axis = 1.5,
+        xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_flex, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(flex.vec.store[[7]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(flex.vec.store[[7]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(flex.vec.store[[7]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(flex.vec.store[[7]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(flex.vec.store[[7]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(flex.vec.store[[7]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(flex.vec.store[[7]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+
+# Gorgonia
+matplot(gorg.vec.store[[7]], typ = "n", ylim = c(0, 14), yaxs = "i", xaxs = "i",
+        xlab = "",
+        ylab = "",
+        cex.axis = 1.5,
+        xaxt = 'n')
+# Re-label x axis tick labels.
+axis(1, at = c(1, 50, 100, 150, 200), labels = Xaxis_gorg, cex.axis = 1.5)
+# Add size distributions
+# 2020
+points(gorg.vec.store[[7]][,2], typ = "l", lty = "solid", col = "black", lwd = 3)
+# 2023
+points(gorg.vec.store[[7]][,5], typ = "l", lty = "solid", col = "dark grey", lwd = 3)
+# 2039
+points(gorg.vec.store[[7]][,21], typ = "l", lty = "solid", col = "light grey", lwd = 3)
+#2055
+points(gorg.vec.store[[7]][,37], typ = "l", lty = "solid", col = "blue", lwd = 3)
+# 2071
+points(gorg.vec.store[[7]][,53], typ = "l", lty = "solid", col = "red", lwd = 3)
+# 2087
+points(gorg.vec.store[[7]][,69], typ = "l", lty = "solid", col = "purple", lwd = 3)
+# 2100
+points(gorg.vec.store[[7]][,82], typ = "l", lty = "solid", col = "orange", lwd = 3)
+legend(150, 10, legend = c("2020","2023", "2039","2055","2071","2087","2100"), fill = c("Black","dark grey","light grey","blue","red","purple",'orange'), bg = NULL, bty = "n", cex = 1.2)
+
+
 
 ##### ----------------------------------------------------- End of Code & Analysis ---------------------------------------------
